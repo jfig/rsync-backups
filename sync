@@ -8,6 +8,9 @@ list="lm-data owncloud vmail win-shares"
 
 #--
 
+# start batabase backup if script is present
+[[ -x bkDatabase ]] && ./bkDatabase &
+
 # if the excludes file exists inclued it and remove
 # excluded files from local copy
 [[ -f excludes ]] && ex=" --excludes-from=excludes --delete-excluded "
@@ -22,3 +25,6 @@ do
         echo $a
         rsync -a --delete $ex ${serverPart}${a} data/
 done
+
+# wait for database backup to end
+wait

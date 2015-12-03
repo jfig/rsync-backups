@@ -1,0 +1,18 @@
+#!/bin/bash
+
+RS=CMX
+USER=root
+PASS=inYourDreams
+
+##=====------- - -  -   NO EDIT PAST THIS POINT
+
+function doDbBk() {
+ ssh ${RS} "mysqldump -u${USER} --password=${PASS} --all-databases --events | bzip2 -9 "
+}
+
+# remove previous backup file, since we are using hard links the file
+# must not be changed, else we'd be changing the previous backups
+[[ -f ${RS}_mysqldump.sql.bz2 ]] && rm ${RS}/${RS}_mysqldump.sql.bz2
+
+# do the backup
+doDbBk > ${RS}_mysqldump.sql.bz2
