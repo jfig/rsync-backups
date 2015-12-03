@@ -1,0 +1,108 @@
+#!/bin/bash
+#--
+
+
+# for how many hours can the script run?
+#   in this case set for 23 so a cron job can start every 24 hours
+runForHours=23
+
+#-------
+
+# turn hours into seconds
+timeLimit=$(( ${runForHours}*3600 + $(date +%s) ))
+
+# save the script starting directory
+startPoint=$(pwd)
+
+# get the real name of the latest backup directory "latest" is 
+# just a symlink to it
+OLDFLD=$(cd latest;pwd -P)
+
+# determine the name for the new backup directory
+NEWFLD=$(date +"%Y%m%d-%H%M")
+
+#---
+# copy the last backup to the new backup directory
+
+echo "Replicating previous backup..."
+# copy using hard links so no "new" space is used in disk
+cp -al $OLDFLD $NEWFLD  
+
+# replace the "latest" symlink to the new backup
+rm latest; ln -s $NEWFLD latest
+echo "Replication complete, launching background backups...."
+
+
+#---
+# Start the background processes 
+#
+# run a FOR loop on every subdirectory in "latest" and start a 
+# background backup process if a "sync" executable is present,
+# store information on two arrays
+
+declare -a PIDlist     # Will store the PIDs of the background backups
+declare -a FolderList  # Will store the Directories names 
+
+for fl in $( ls -d latest/*/ )
+do
+  if [[ -x ${fl}/sync ]]
+  then
+    cd ${fl}
+    echo "   " ${fl} 
+    ./sync > output.log &
+    PIDlist+=($!)
+    FolderList+=($fl)
+
+    cd ${startPoint}
+  fi
+done
+
+
+#---
+# wait for background processes to terminate and if needed,
+# at the timelimit, forceffly terminate them 
+
+tC=${#PIDlist[@]} # totalCount
+active=$tC
+
+while true 
+do
+  i=0
+  while [[ $i -lt $tC ]]
+  do
+    if [[ ${PIDlist[${i}]} != ""  ]]
+    then
+      if ! kill -0 ${PIDlist[${i}]} > /dev/null 2>&1
+      then
+        echo "Process " ${FolderList[$i]} " terminated"
+        PIDlist[$i]=""
+        ((active--))
+        echo "   ... waiting for:" $active
+      fi
+    fi
+    ((i++))
+  done
+  if [[ $active -eq 0 ]]
+  then
+    echo "complete"
+    exit
+  fi
+  if [[ $(date +%s) -gt $timeLimit ]]
+  then
+    echo "Time Limit exceeded terminating remaining processes"
+    i=0
+    while [[ $i -lt $tC ]]
+    do
+      if [[ ${PIDlist[${i}]} != "" ]]
+      then
+        kill -9 ${PIDlist[${i}]}
+        echo "  ..." ${FolderList[$i]} "terminated"
+      fi
+      sleep 10 # wait for kernel to terminate processes
+    done
+    exit
+  fi
+
+  sleep 10 # sleep a while 
+
+done

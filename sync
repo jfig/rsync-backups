@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# ssh must be configured via ~/.ssh/config
+serverPart="CMX:/mnt/data/"
+
+# list of directories on remote host to backup 
+list="lm-data owncloud vmail win-shares"
+
+#--
+
+# if the excludes file exists inclued it and remove
+# excluded files from local copy
+[[ -f excludes ]] && ex=" --excludes-from=excludes --delete-excluded "
+
+
+# create the data directory 
+[[ ! -d data ]] && mkdir data
+
+
+for a in $list
+do
+        echo $a
+        rsync -a --delete $ex ${serverPart}${a} data/
+done
