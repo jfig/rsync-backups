@@ -24,8 +24,7 @@ Files:
 
 
 
-...
-#!
+<pre>
 |-- replicator*
 |-- backup-directory-1
 |   |-- ServerA
@@ -57,4 +56,4 @@ Files:
 |   |   |   |-- backup-directory-from-server-A-one
 |   |   |   |-- backup-directory-from-server-A-two
 |   |   |   |-- backup-directory-from-server-A-three
-...
+</pre>
