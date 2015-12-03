@@ -9,51 +9,77 @@ To simplify access to the remote servers it is recommended the entries
 be made to the `~/.ssh/config` file defining server address, port, 
 user and key file to use.
 
+
+
 Files: 
 
 * `replicator`
-> replicates the latest backup directory to a new directory, scans 
-> the sub directories for executable files named `sync` and runs them 
-> in the background until a time limit is reached
+
+    Replicates the latest backup directory to a new directory (named 
+		with the current date and time) and scans the sub directories for 
+		executable files named `sync` and runs them in the background 
+		until a time limit is reached
 
 * `sync`
-> does the backup of a single server to the `data` directory this 
-> script can be highly modified to adapt to the server being backup 
+
+		Does the backup of a single server to the `data` directory this 
+		script can be highly modified to adapt to the server being backup 
+
+* `bkDatabase`
+
+		Backs up a MySQL database, if this file is present it will be
+		invoked by the `sync` script. File must be edited to enter server,
+		database username and database password
+
 
 ## Seeding ##
 
+* Create a directory to hold the backups
+* Copy the `replicator` script to this directory
+* Create a "seeder" directory and symlink named "latest" pointing 
+  to it
+  	`mkdir xpto; ln -s xpto latest`
+* Inside the `latest` directory create a subdirectory for each of the 
+  servers that you want to backup
+* Copy the `sync` file to servers directory and adapt it to that 
+  server
+* If the server has a MySQL database copy also de `bkDatabase` file 
+  add adapt it
 
-
-<pre>
-|-- replicator*
-|-- backup-directory-1
-|   |-- ServerA
-|   |   |-- sync*
-|   |   |-- excludes
-|   |   |-- data
-|   |   |   |-- backup-directory-from-server-A-one
-|   |   |   |-- backup-directory-from-server-A-two
-|   |   |   |-- backup-directory-from-server-A-three
-|   |-- ServerB
-|   |   |-- sync*
-|   |   |-- excludes
-|   |   |-- data
-|   |   |   |-- backup-directory-from-server-A-one
-|   |   |   |-- backup-directory-from-server-A-two
-|   |   |   |-- backup-directory-from-server-A-three
-|-- backup-directory-2
-|   |-- ServerA
-|   |   |-- sync*
-|   |   |-- excludes
-|   |   |-- data
-|   |   |   |-- backup-directory-from-server-A-one
-|   |   |   |-- backup-directory-from-server-A-two
-|   |   |   |-- backup-directory-from-server-A-three
-|   |-- ServerB
-|   |   |-- sync*
-|   |   |-- excludes
-|   |   |-- data
-|   |   |   |-- backup-directory-from-server-A-one
-|   |   |   |-- backup-directory-from-server-A-two
-|   |   |   |-- backup-directory-from-server-A-three
-</pre>
+## Directory structure ##
+```
+ |-- replicator*
+ |-- DATE1 (backup directory 1)
+ |   |-- ServerA
+ |   |   |-- sync*
+ |   |   |-- excludes
+ |   |   |-- bkDatabase
+ |   |   |-- ServerA_mysqldump.sql.bz2
+ |   |   |-- data
+ |   |   |   |-- backup-directory-from-server-A-one
+ |   |   |   |-- backup-directory-from-server-A-two
+ |   |   |   |-- backup-directory-from-server-A-three
+ |   |-- ServerB
+ |   |   |-- sync*
+ |   |   |-- excludes
+ |   |   |-- data
+ |   |   |   |-- backup-directory-from-server-A-one
+ |   |   |   |-- backup-directory-from-server-A-two
+ |   |   |   |-- backup-directory-from-server-A-three
+ |-- DATE2 (backup directory 2)
+ |   |-- ServerA
+ |   |   |-- sync*
+ |   |   |-- excludes
+ |   |   |-- data
+ |   |   |   |-- backup-directory-from-server-A-one
+ |   |   |   |-- backup-directory-from-server-A-two
+ |   |   |   |-- backup-directory-from-server-A-three
+ |   |-- ServerB
+ |   |   |-- sync*
+ |   |   |-- excludes
+ |   |   |-- data
+ |   |   |   |-- backup-directory-from-server-A-one
+ |   |   |   |-- backup-directory-from-server-A-two
+ |   |   |   |-- backup-directory-from-server-A-three
+ |-- latest (symlink to DATE2)
+```
