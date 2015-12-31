@@ -1,0 +1,11 @@
+#!/bin/bash
+BKDIR=/mnt/backups/backups
+
+if [[ -d $BKDIR ]]; then
+  cd $BKDIR
+  ./$BKSCRIPT
+  exit 0
+else
+  &2> echo "Can't chdir to Backup Directory: $BKDIR"
+  exit 1
+fi
