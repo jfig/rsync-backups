@@ -1,29 +1,38 @@
 #!/bin/bash
 
 # ssh must be configured via ~/.ssh/config
-serverPart="CMX:/mnt/data/"
+serverPart="CMX"
 
-# list of directories on remote host to backup 
-list="lm-data owncloud vmail win-shares"
+# list of directories on remote host to backup
+list="/mnt/data/lm-data /mnt/data/owncloud /mnt/data/vmail /mnt/data/win-shares"
 
-#--
+#----
+
+# load functions
+. $RSYNCBACKUPS_FUNCTIONSFILE
+
+# test if remote server is available and exit if not
+sshtest $serverPart || {
+  >&2 echo "unable to connect to $serverPart, exiting"
+  exit 2
+}
 
 # start batabase backup if script is present
 [[ -x bkDatabase ]] && ./bkDatabase &
 
 # if the excludes file exists inclued it and remove
 # excluded files from local copy
-[[ -f excludes ]] && ex=" --excludes-from=excludes --delete-excluded "
+[[ -f excludes ]] && ex=" --exclude-from=excludes --delete-excluded "
 
 
-# create the data directory 
+# create the data directory
 [[ ! -d data ]] && mkdir data
 
 
 for a in $list
 do
         echo $a
-        rsync -a --delete $ex ${serverPart}${a} data/
+        rsync -a --delete $ex ${serverPart}:${a} data/
 done
 
 # wait for database backup to end

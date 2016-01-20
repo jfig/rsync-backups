@@ -1,0 +1,14 @@
+#!/bin/bash
+#---
+# Common Functions used by the rsyncBackups scripts
+
+# test ssh connectivity to a server
+# details on:  https://bitbucket.org/jfig/bash
+# @param $1 Server
+# @param $2 Port
+function sshtest () {
+	SERVER=$1
+	[ -z $2 ] || PORT="-p $2"
+	ssh $PORT -o BatchMode=yes -o ConnectTimeout=5 ${SERVER} echo OK / > /dev/null
+	return $?
+}
