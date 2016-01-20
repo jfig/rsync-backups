@@ -12,9 +12,16 @@ user and key file to use.
 
 ## Files: ##
 
+### `dailyBackup` ###
+
+File to be placed on `/etc/cron.daily` or another place like `/usr/local/sbin/`
+and invoked by the root's crontab.
+
+It checks the availability of the backup directory and starts `replicator`.
+
 ### `replicator` ###
 
-Replicates the latest backup directory to a new directory (named with the 
+Replicates the latest backup directory to a new directory (named with the
 current date and time) and scans the sub directories for executable files
 named `sync` and runs them in the background until a time limit is reached.
 
@@ -29,6 +36,12 @@ Backs up a MySQL database, if this file is present it will be
 invoked by the `sync` script. File must be edited to enter server,
 database username and database password.
 
+## `functions` ##
+
+File to be placed on `/usr/local/etc/rsyncBackups` or on the backup directory,
+together with `replicator`.
+
+This file contains several bash functions used by the other scripts.
 
 ## Seeding ##
 
