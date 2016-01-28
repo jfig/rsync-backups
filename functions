@@ -12,3 +12,45 @@ function sshtest () {
 	ssh $PORT -o BatchMode=yes -o ConnectTimeout=5 ${SERVER} echo OK / > /dev/null
 	return $?
 }
+
+# output text
+#
+# Messages with "error" severity (above 20) are outputed to stdErr
+#
+# @param $1 Message
+# @level $1 Severity of the Message
+#     0     or null informative
+#     1-9   informative
+#     10-19 warning
+#     20-xx error
+#
+# Assumed ENV variables
+#  OUTPUT_SEVERITY int minimal severity of a message to be outputed to stdOut
+#  LOG_SEVERITY    int minimal severity of a message to be logged on syslog
+say() {
+	# if expected env variavles aren't set all messaes are echoed to both stdOut
+	# or stdErr and logger
+	[ ! -z $OUTPUT_SEVERITY ] && {
+		OUTPUT_SEVERITY=0
+		say "OUTPUT_SEVERITY env variable not set all messages will be echoed to stdOut or stfErr" 10
+	}
+	[ ! -z $LOG_SEVERITY ] && {
+		LOG_SEVERITY=0
+		say "LOG_SEVERITY env variable not set all messages will be echoed to log" 10
+	}
+
+	# exit with error if no message argument received
+	{ [ -z $1 ] && return 1; } || message=$1
+
+	# set severity if argument received
+	[ -z $2 ] || severity=$2
+
+	# change output to stdErr if Severity greater or equal to 20
+	{ [ $severity -ge 20 ] && ch=2; } || ch=1
+
+	# do the actual output
+	[[ $OUTPUT_SEVERITY -ge $severity ]] && >&${ch} echo $message
+	[[ $LOG_SEVERITY -ge $severity ]] && logger -i  $message
+
+	return 0
+}
