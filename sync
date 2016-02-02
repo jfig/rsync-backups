@@ -18,7 +18,10 @@ sshtest $serverPart || {
 }
 
 # start batabase backup if script is present
-[[ -x bkDatabase ]] && ./bkDatabase &
+[[ -x bkDatabase ]] && {
+  say "Starting database backup" 7
+  ./bkDatabase &
+}
 
 # if the excludes file exists inclued it and remove
 # excluded files from local copy
