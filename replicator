@@ -1,7 +1,14 @@
 #!/bin/bash
 #--
 
-export RSYNCBACKUPS_FUNCTIONSFILE="./functions"
+export RSYNCBACKUPS_FUNCTIONSFILE=$(pwd)"/functions"
+
+# set env variables for "say" the output and logging function
+# we'll be pretty verbose at this stage
+# @TODO move this to a config file
+export SAY_OUTPUT_SEVERITY = 1
+export SAY_LOG_SEVERITY = 20
+export SAY_DEFAULT_SEVERITY = 1
 
 # for how many hours can the script run?
 #   in this case set for 23 so a cron job can start every 24 hours
@@ -25,13 +32,13 @@ NEWFLD=$(date +"%Y%m%d-%H%M")
 #---
 # copy the last backup to the new backup directory
 
-echo "Replicating previous backup..."
+say "Replicating previous backup..." 4
 # copy using hard links so no "new" space is used in disk
 cp -al $OLDFLD $NEWFLD
 
 # replace the "latest" symlink to the new backup
 rm latest; ln -s $NEWFLD latest
-echo "Replication complete, launching background backups...."
+say "Replication complete, starting background backups...."  3
 
 
 #---
@@ -49,7 +56,7 @@ do
   if [[ -x ${directory}/sync ]]
   then
     cd ${directory}
-    echo "   " ${directory}
+    say "Started: ${directory}" 4
     ./sync > output.log &
     PIDlist+=($!)
     FolderList+=($directory)
@@ -75,32 +82,33 @@ do
     then
       if ! kill -0 ${PIDlist[${i}]} > /dev/null 2>&1
       then
-        echo "Process " ${FolderList[$i]} " terminated"
+        say "Process ${FolderList[$i]} terminated" 4
         PIDlist[$i]=""
         ((active--))
-        echo "   ... waiting for:" $active
       fi
     fi
     ((i++))
   done
   if [[ $active -eq 0 ]]
   then
-    echo "complete"
+    say "Backup process complete, exiting" 9
     exit
   fi
   if [[ $(date +%s) -gt $timeLimit ]]
   then
-    echo "Time Limit exceeded terminating remaining processes"
+    say "Time Limit exceeded terminating remaining processes" 15
     i=0
     while [[ $i -lt $tC ]]
     do
       if [[ ${PIDlist[${i}]} != "" ]]
       then
         kill -9 ${PIDlist[${i}]}
-        echo "  ..." ${FolderList[$i]} "terminated"
+        say "Terminated: ${FolderList[$i]} " 10
+        sleep 1
       fi
       sleep 10 # wait for kernel to terminate processes
     done
+    say "Backup process terminated, exiting" 9
     exit
   fi
 

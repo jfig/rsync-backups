@@ -13,7 +13,7 @@ list="/mnt/data/lm-data /mnt/data/owncloud /mnt/data/vmail /mnt/data/win-shares"
 
 # test if remote server is available and exit if not
 sshtest $serverPart || {
-  >&2 echo "unable to connect to $serverPart, exiting"
+  say "unable to connect to $serverPart, exiting" 25
   exit 2
 }
 
@@ -31,8 +31,8 @@ sshtest $serverPart || {
 
 for a in $list
 do
-        echo $a
-        rsync -a --delete $ex ${serverPart}:${a} data/
+  say "Backing up: $a" 5
+  rsync -a --delete $ex ${serverPart}:${a} data/
 done
 
 # wait for database backup to end

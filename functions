@@ -25,32 +25,41 @@ function sshtest () {
 #     20-xx error
 #
 # Assumed ENV variables
-#  OUTPUT_SEVERITY int minimal severity of a message to be outputed to stdOut
-#  LOG_SEVERITY    int minimal severity of a message to be logged on syslog
+#  SAY_OUTPUT_SEVERITY  int minimal severity of a message to be outputed to stdOut
+#  SAY_LOG_SEVERITY     int minimal severity of a message to be logged on syslog
+#  SAY_DEFAULT_SEVERITY int default severity for messages if not passed by caller
 say() {
 	# if expected env variavles aren't set all messaes are echoed to both stdOut
 	# or stdErr and logger
-	[ ! -z $OUTPUT_SEVERITY ] && {
-		OUTPUT_SEVERITY=0
-		say "OUTPUT_SEVERITY env variable not set all messages will be echoed to stdOut or stfErr" 10
+	[ -z $SAY_OUTPUT_SEVERITY ] && {
+		export SAY_OUTPUT_SEVERITY=0
+		say "SAY_OUTPUT_SEVERITY env variable not set all messages will be echoed to stdOut or stfErr" 10
 	}
-	[ ! -z $LOG_SEVERITY ] && {
-		LOG_SEVERITY=0
-		say "LOG_SEVERITY env variable not set all messages will be echoed to log" 10
+	[ -z $SAY_LOG_SEVERITY ] && {
+		SAY_LOG_SEVERITY=0
+		say "SAY_LOG_SEVERITY env variable not set all messages will be echoed to log" 10
 	}
+	[ -z $SAY_DEFAULT_SEVERITY ] && {
+		SAY_DEFAULT_SEVERITY=5
+		say "SAY_DEFAULT_SEVERITY env variable not set, default set to $SAY_DEFAULT_SEVERITY" 10
+	}
+
 
 	# exit with error if no message argument received
-	{ [ -z $1 ] && return 1; } || message=$1
+	{ [[ -z $1 ]] && return 1; } || message=$1
+	#echo "message:" $message
 
 	# set severity if argument received
-	[ -z $2 ] || severity=$2
+	{ [ -z $2 ] || severity=$2; } || severity=$SAY_DEFAULT_SEVERITY
+	#echo "severity:" $severity
 
 	# change output to stdErr if Severity greater or equal to 20
-	{ [ $severity -ge 20 ] && ch=2; } || ch=1
+	{ [[ $severity -ge 20 ]] && ch=2; } || ch=1
+	#echo "channel:" $ch
 
 	# do the actual output
-	[[ $OUTPUT_SEVERITY -ge $severity ]] && >&${ch} echo $message
-	[[ $LOG_SEVERITY -ge $severity ]] && logger -i  $message
+	[[ $severity -ge $SAY_OUTPUT_SEVERITY ]] && >&${ch} echo $message
+	[[ $severity -ge $SAY_LOG_SEVERITY ]] && logger -i  $message
 
 	return 0
 }
