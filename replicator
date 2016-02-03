@@ -6,9 +6,9 @@ export RSYNCBACKUPS_FUNCTIONSFILE=$(pwd)"/functions"
 # set env variables for "say" the output and logging function
 # we'll be pretty verbose at this stage
 # @TODO move this to a config file
-export SAY_OUTPUT_SEVERITY = 1
-export SAY_LOG_SEVERITY = 20
-export SAY_DEFAULT_SEVERITY = 1
+export SAY_OUTPUT_SEVERITY=1
+export SAY_LOG_SEVERITY=20
+export SAY_DEFAULT_SEVERITY=1
 
 # for how many hours can the script run?
 #   in this case set for 23 so a cron job can start every 24 hours
