@@ -63,3 +63,13 @@ say() {
 
 	return 0
 }
+
+# test if a variable is an integer
+# based on http://stackoverflow.com/questions/806906/how-do-i-test-if-a-variable-is-a-number-in-bash
+isInt() {
+	re='^[0-9]+$'
+	if ! [[ $1 =~ $re ]] ; then
+	   return 1
+	fi
+	return 0
+}
