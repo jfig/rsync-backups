@@ -25,6 +25,14 @@ Replicates the latest backup directory to a new directory (named with the
 current date and time) and scans the sub directories for executable files
 named `sync` and runs them in the background until a time limit is reached.
 
+#### Usage
+
+`replicator -d working_directory [ -t time_to_live ]`
+
+  `-d working_directory` - directory (or "Backup Store") where it will look for work to do
+
+  `-t time_to_live` - optional, for how long, in seconds, the process will live
+
 ### `sync` ###
 
 Does the backup of a single server to the `data` directory this
