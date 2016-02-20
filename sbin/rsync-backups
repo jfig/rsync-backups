@@ -1,7 +1,18 @@
 #!/bin/bash
-BKDIR=/mnt/backups/backups
-BKSCRIPT=/usr/local/lib/rsync-backups/replicator
-DURATION=82800
+#--
+# This script loads configurations form the main CONFig file and starts
+# the "replicator" that will replicate the previous backup and call the
+# worker scripts the will do the actual backup.
+#--
+# Project: https://github.com/jfig/rsync-backups/
+# License: https://github.com/jfig/rsync-backups/blob/master/LICENSE
+#----
+
+BKSCRIPT="/usr/local/lib/rsync-backups/replicator"
+
+export CONFIG_DIR="/etc/rsync-backups/"
+
+. ${CONFIG_DIR}/conf  || { >&2 echo "fatal: could not load config"; exit; }
 
 #----
 
