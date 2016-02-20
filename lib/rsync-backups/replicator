@@ -1,5 +1,12 @@
 #!/bin/bash
 #--
+#
+#
+#--
+# EXIT CODES
+# 12 - Unable to find BACKUP_STORE
+# 13 - Unable to find "latest" inside BACKUP_STORE
+#----
 
 export RSYNCBACKUPS_FUNCTIONSFILE=$(pwd)"/functions"
 
@@ -10,17 +17,38 @@ export SAY_OUTPUT_SEVERITY=1
 export SAY_LOG_SEVERITY=20
 export SAY_DEFAULT_SEVERITY=1
 
-# for how many hours can the script run?
-#   in this case set for 23 so a cron job can start every 24 hours
-runForHours=23
-
 #-------
+. $RSYNCBACKUPS_FUNCTIONSFILE
 
-# turn hours into seconds
-timeLimit=$(( ${runForHours}*3600 + $(date +%s) ))
+# set the default timeLimit to 0 - no limit
+timeLimit=0
 
-# save the script starting directory
-startPoint=$(pwd)
+
+# read command line arguments and set options
+OPTIND=1
+white getopts "d:t:" opt; do
+  case "$opt" in
+    d)
+      BACKUP_STORE=$OPTARG
+      ;;
+    t)
+      timeLimit=$(( $(date +%s) + $OPTARG ))
+      ;;
+  esac
+done
+
+
+# check if BACKUP_STORE exists
+[ -d $BACKUP_STORE ] || {
+  say "fatal: $BACKUP_STORE doesn't exist" 29
+  exit 12
+}
+
+# check if BACKUP_STORE has a directory/syn  named "latest"
+[ -d ${BACKUP_STORE}/latest ] || {
+  say "fatal: can't find 'latest' inside $BACKUP_STORE" 29
+  exit 13
+}
 
 # get the real name of the latest backup directory "latest" is
 # just a symlink to it
@@ -61,7 +89,7 @@ do
     PIDlist+=($!)
     FolderList+=($directory)
 
-    cd ${startPoint}
+    cd ${BACKUP_STORE}
   fi
 done
 
@@ -94,7 +122,7 @@ do
     say "Backup process complete, exiting" 9
     exit
   fi
-  if [[ $(date +%s) -gt $timeLimit ]]
+  if [[ ( $(date +%s) -gt $timeLimit ) && ( $timeLimit != 0 ) ]]
   then
     say "Time Limit exceeded terminating remaining processes" 15
     i=0

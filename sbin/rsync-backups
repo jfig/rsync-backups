@@ -1,0 +1,8 @@
+#!/bin/bash
+BKDIR=/mnt/backups/backups
+BKSCRIPT=/usr/local/lib/rsync-backups/replicator
+DURATION=82800
+
+#----
+
+$BKSCRIPT -d $BKDIR -t $DURATION

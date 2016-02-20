@@ -29,9 +29,15 @@ named `sync` and runs them in the background until a time limit is reached.
 
 `replicator -d working_directory [ -t time_to_live ]`
 
-  `-d working_directory` - directory (or "Backup Store") where it will look for work to do
+  `-d working_directory` - directory (or "Backup Store") where it will look for
+                           work to do
 
   `-t time_to_live` - optional, for how long, in seconds, the process will live
+
+#### Exit codes
+
+    12 - Unable to find BACKUP_STORE
+    13 - Unable to find "latest" inside BACKUP_STORE
 
 ### `sync` ###
 
