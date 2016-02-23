@@ -8,12 +8,17 @@
 # License: https://github.com/jfig/rsync-backups/blob/master/LICENSE
 #----
 
-BKSCRIPT="/usr/local/lib/rsync-backups/replicator"
-
+export RSYNCBACKUPS_LIBDIR="/usr/local/lib/rsync-backups/"
 export CONFIG_DIR="/etc/rsync-backups/"
 
-. ${CONFIG_DIR}/conf  || { >&2 echo "fatal: could not load config"; exit; }
+BKSCRIPT=${RSYNCBACKUPS_LIBDIR}"/replicator"
 
-#----
+#-- pre-flight testing
+
+. ${CONFIG_DIR}/conf  || { >&2 echo "fatal: could not load config"; exit 1; }
+[ -f $BKSCRIPT ] || { >&2 echo "fatal: could not find $BKSCRIPT"; exit 2; }
+[ -x $BKSCRIPT ] || { >&2 echo "fatal: $BKSCRIPT is not an executable"; exit 3; }
+
+#-- flight
 
 $BKSCRIPT -d $BKDIR -t $DURATION

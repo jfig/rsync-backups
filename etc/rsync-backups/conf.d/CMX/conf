@@ -1,0 +1,4 @@
+CLIENT=CMX
+FOLDERS="/mnt/data/lm-data /mnt/data/owncloud /mnt/data/vmail /mnt/data/win-shares"
+MYSQL_USER=root
+MYSQL_PASS="inYourDreams"

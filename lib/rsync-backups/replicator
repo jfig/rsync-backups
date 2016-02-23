@@ -4,11 +4,12 @@
 #
 #--
 # EXIT CODES
+#  1 - Unable to load Functions
 # 12 - Unable to find BACKUP_STORE
 # 13 - Unable to find "latest" inside BACKUP_STORE
 #----
 
-export RSYNCBACKUPS_FUNCTIONSFILE=$(pwd)"/functions"
+export RSYNCBACKUPS_FUNCTIONSFILE=${RSYNCBACKUPS_LIBDIR}"/functions"
 
 # set env variables for "say" the output and logging function
 # we'll be pretty verbose at this stage
@@ -18,7 +19,10 @@ export SAY_LOG_SEVERITY=20
 export SAY_DEFAULT_SEVERITY=1
 
 #-------
-. $RSYNCBACKUPS_FUNCTIONSFILE
+. $RSYNCBACKUPS_FUNCTIONSFILE ||  {
+   >&2 echo "fatal: could not load functions"
+   exit 1
+}
 
 # set the default timeLimit to 0 - no limit
 timeLimit=0
@@ -26,7 +30,7 @@ timeLimit=0
 
 # read command line arguments and set options
 OPTIND=1
-white getopts "d:t:" opt; do
+while getopts "d:t:" opt; do
   case "$opt" in
     d)
       BACKUP_STORE=$OPTARG
@@ -49,6 +53,8 @@ done
   say "fatal: can't find 'latest' inside $BACKUP_STORE" 29
   exit 13
 }
+
+cd $BACKUP_STORE
 
 # get the real name of the latest backup directory "latest" is
 # just a symlink to it

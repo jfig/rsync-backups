@@ -73,3 +73,34 @@ isInt() {
 	fi
 	return 0
 }
+
+# get the mysqldump of a remote server and dump it to stdOut
+# arguments
+#  -s REMOTE_SERVER
+#  -u USER           - database user
+#  -p PASSWORD       - database password
+mysqlBackup() {
+	# read command line arguments and set options
+	OPTIND=1
+	while getopts "s:u:p:f:" opt; do
+	  case "$opt" in
+	    s)
+	      REMOTE_SERVER=$OPTARG
+	      ;;
+	    u)
+	      USER=$OPTARG
+	      ;;
+			p)
+				PASSWORD=$OPTARG
+				;;
+	  esac
+	done
+
+	ssh ${REMOTE_SERVER} \
+		"mysqldump \
+			-u${USER} \
+			--password=${PASSWORD} \
+			--all-databases \
+			--events "
+	return $?
+}

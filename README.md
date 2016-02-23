@@ -12,37 +12,51 @@ user and key file to use.
 
 ## Files: ##
 
-### `dailyBackup` ###
+### `/usr/local/sbin/rsync-backups` ###
 
-File to be placed on `/etc/cron.daily` or another place like `/usr/local/sbin/`
-and invoked by the root's crontab.
+Script that is invoked by `/etc/cron.daily` or `crontab` reads configurations from `/etc/rsync-backup/config` and invokes `replicator` with the appropriate `env` variables setup.
 
-It checks the availability of the backup directory and starts `replicator`.
+### `/usr/local/lib/rsync-backups/replicator` ###
 
-### `replicator` ###
+  * Replicates the latest backup directory to a new directory (named
+    with the current date and time)
+  * scans the `/etc/rsync-backups/conf.d/` directory for config files
+    and runs the worker `sync` scripts that do the actual backup in the
+    background until a time limit is reached.
 
-Replicates the latest backup directory to a new directory (named with the
-current date and time) and scans the sub directories for executable files
-named `sync` and runs them in the background until a time limit is reached.
+Expects the `env` variable CONFIG_DIR to point to the configuration DIR that
+holds the "`conf.d`".
 
 #### Usage
 
 `replicator -d working_directory [ -t time_to_live ]`
 
-  `-d working_directory` - directory (or "Backup Store") where it will look for
-                           work to do
+  `-d working_directory` - directory (or "Backup Store") where it will
+                           look for  work to do
 
-  `-t time_to_live` - optional, for how long, in seconds, the process will live
+  `-t time_to_live` - optional, for how long, in seconds, the process
+                      will live
 
 #### Exit codes
 
     12 - Unable to find BACKUP_STORE
     13 - Unable to find "latest" inside BACKUP_STORE
 
-### `sync` ###
+### `/usr/local/lib/rsync-backups/sync` ###
 
-Does the backup of a single server to the `data` directory this
-script can be highly modified to adapt to the server being backup.  
+Worker script that does the actual backup of a server. Reads it's
+configuration from the specified directory.
+
+#### Usage
+
+`sync -c CONFIG_DIR -d BACKUP_DIR`
+
+  `-c CONFIG_DIR` - configuration directory for this server, for example
+                   `/etc/rsync-backups/conf.d/CMX/`
+
+  `-d BACKUP_DIR` - path to the directory that will hold the backup, the
+                    `sync` script will try to update data that already
+                    exists there or create it
 
 ### `bkDatabase` ###
 
@@ -58,6 +72,8 @@ together with `replicator`.
 This file contains several bash functions used by the other scripts.
 
 ## Seeding ##
+
+@TODO THIS SECTION IS OUTDATED
 
 * Create a directory to hold the backups
 

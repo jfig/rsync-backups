@@ -1,0 +1,74 @@
+#!/bin/bash
+#--
+# Worker script that handles the backup of a Client server
+#--
+# Project: https://github.com/jfig/rsync-backups/
+# License: https://github.com/jfig/rsync-backups/blob/master/LICENSE
+#--
+# EXIT CODES:
+#  1 - Unable to load Functions
+#  2 - ssh connection to remote server failed
+# 12 - Unable to find BACKUP_STORE
+# 13 - Unable to write to BACKUP_STORE
+# 14 - Unable to find configuration file
+# 15 - Error while reading configuration file
+#----
+
+# load functions
+. $RSYNCBACKUPS_FUNCTIONSFILE ||  {
+   >&2 echo "fatal: could not load functions"
+   exit 1
+}
+
+# read command line arguments and set options
+OPTIND=1
+while getopts "d:c:" opt; do
+  case "$opt" in
+    d)
+      BACKUP_STORE=$OPTARG
+      ;;
+    d)
+      CONFIG_DIR=$OPTARG
+      ;;
+  esac
+done
+
+# load configuration file
+. $CONFIG_DIR/config || {
+  say "fatal: unable to load $CONFIG_DIR/config" 29; exit 14; }
+
+# test if remote server is available and exit if not
+sshtest $CLIENT || {
+  say "fatal: unable to connect to $CLIENT" 25; exit 2; }
+
+# database backup if user is setup
+[ -z ${MYSQL_USER+x} ] || {
+  DB_BKFILE=${BACKUP_STORE}/DBBACKUP/${DB_BKFOLDER}/${CLIENT}-mysqldump.sql.bz2
+
+  # test if destination folder exists and if it can be created
+  [ ! -d $(dirname $DB_BKFILE) ] && mkdir -p $(dirname $DB_BKFILE) || {
+    say "fatal: Unable to create directory to hold database backup" 35
+  } && {
+    # do badabase backup in backgrund
+    mysqlBackup -s $CLIENT -u $MYSQL_USER -p $MYSQL_PASS \
+      | bzip2 -9 > ${DB_BKFILE} &
+  }
+}
+
+# if the excludes file exists inclued it and remove
+# excluded files from local copy
+[[ -f ${CONFIG_DIR}/excludes ]] && \
+  ex=" --exclude-from=${CONFIG_DIR}/excludes --delete-excluded "
+
+# create the data directory
+[[ ! -d ${BACKUP_STORE}/data ]] && mkdir ${BACKUP_STORE}/data
+
+
+for a in $list
+do
+  say "Backing up: $a" 5
+  rsync -a --delete $ex ${serverPart}:${a} ${BACKUP_STORE}/data/
+done
+
+# wait for database backup to end
+wait
