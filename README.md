@@ -9,6 +9,10 @@ To simplify access to the remote servers it is recommended the entries
 be made to the `~/.ssh/config` file defining server address, port,
 user and key file to use.
 
+## Configuration
+
+
+
 
 ## Files: ##
 
