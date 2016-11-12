@@ -1,6 +1,10 @@
 #!/bin/bash
 #---
 # Common Functions used by the rsyncBackups scripts
+#--
+# Project: https://github.com/jfig/rsync-backups/
+# License: https://github.com/jfig/rsync-backups/blob/master/LICENSE
+#-----
 
 # test ssh connectivity to a server
 # details on:  https://bitbucket.org/jfig/bash

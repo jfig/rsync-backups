@@ -1,8 +1,11 @@
 #!/bin/bash
 #--
-#
-#
+# This script will replicate (via hardlinks) the last backup and call the worker
+# scripts that do the actual backup
 #--
+# Project: https://github.com/jfig/rsync-backups/
+# License: https://github.com/jfig/rsync-backups/blob/master/LICENSE
+#-----
 # EXIT CODES
 # 12 - Unable to find BACKUP_STORE
 # 13 - Unable to find "latest" inside BACKUP_STORE
@@ -18,6 +21,8 @@ export SAY_LOG_SEVERITY=20
 export SAY_DEFAULT_SEVERITY=1
 
 #-------
+
+# get the functiions stored in a seperate file
 . $RSYNCBACKUPS_FUNCTIONSFILE
 
 # set the default timeLimit to 0 - no limit
