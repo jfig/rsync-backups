@@ -1,0 +1,14 @@
+# This file is provided mainly for testing purposses 
+
+version: '2'
+
+services:
+
+  bk-server:
+    image: ubuntu
+    volumes:
+      - dataStore:/mnt/backups
+
+volumes:
+  dataStore:
+    driver: local

@@ -1,0 +1,19 @@
+#!/bin/bash
+#--
+#--
+# This script, to be placed in /etc/cron.daily, will try to invoque the
+# backup script
+#--
+# Project: https://github.com/jfig/rsync-backups/
+# License: https://github.com/jfig/rsync-backups/blob/master/LICENSE
+#-----
+
+BKSCRIPT=/usr/local/sbin/rsync-backups
+
+if [[ -x $BKSCRIPT ]]
+then
+  $BKSCRIPT
+else
+  echo "Could not start backup, file not found ou not executable" >&2
+  exit 5
+fi
