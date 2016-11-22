@@ -9,8 +9,35 @@ To simplify access to the remote servers it is recommended the entries
 be made to the `~/.ssh/config` file defining server address, port,
 user and key file to use.
 
+## Docker
+
+A docker-compose file is provided mainly for testing
 
 ## Files: ##
+
+List of files in project.
+
+Files will be copied to ``/usr/local/``
+
+```
+  /etc
+    /rsync-backups
+      conf           (global configurations)
+  /lib
+    /rsync-backups
+      bkDatabase     (worker file to backup databases)
+      functions      (functions used by other processes)
+      replicator     (worker file that replicates previous backup structure)
+      sync           (worker file to sync files to local backup)
+  /misc              (miscellaneous to be copied to several places)
+    dailyBackup      (invoker, to be placed in /etc/cron.daily)
+    install.sh       (installer)
+  /sbin
+    rsync-backups    (starter, called by cron, reads confs and starts other processes)
+  docker-compose.yml (docker file to setup testing environment)
+  LICENSE            (the LICENSE)
+  README.md          (this file)
+```
 
 ### `dailyBackup` ###
 
